@@ -1,9 +1,11 @@
 import sys
 import math
+from collections import Counter
 
 def SAT_Solver():
     clauses = []
     digits = []
+    deleted_clauses = []
 
     # read rules file
     with open(sys.argv[1],'r') as f:
@@ -42,7 +44,7 @@ def SAT_Solver():
     while True:
         # no clauses
         if len(clauses) == 0:
-            return 'sat'
+            return 'sat', digits
 
         # empty clause
         for clause in clauses:
@@ -50,19 +52,39 @@ def SAT_Solver():
                 return 'unsat' 
 
         # unit clause
-        if len(clauses[0]) == 1:
-            literal = clauses[0][0]
-            if literal not in digits:
-                digits.append(literal)
-            true_idx = []
-            for i, clause in enumerate(clauses):
-                if literal in clause:
-                    true_idx.append(i)
-            for index in sorted(true_idx, reverse=True):
-                del clauses[index]
+        while True:
+            if len(clauses[0]) == 1:
+                literal = clauses[0][0]
+                if literal not in digits:
+                    digits.append(literal)
+                true_idx = []
+                for i, clause in enumerate(clauses):
+                    if literal in clause:
+                        true_idx.append(i)
+                for index in sorted(true_idx, reverse=True):
+                    deleted_clauses.append(clauses.pop(index))
+            else:
+                break
 
-        # split
-        # TODO implement split
+        # split (DLCS)
+        # TODO implement split GSAT
+      
+        # concatenate all literals
+        all_clauses=[]
+        for clause in clauses:
+            all_clauses+=clause
+
+        # sort by DLCS
+        scores = Counter(all_clauses)
+        CP_CN = sorted(sorted(scores), key=lambda symbol: scores[symbol] + scores[-symbol])
+
+        # set next truth value to literal 
+        v = 0 # TODO adjust
+        literal = CP_CN[v]
+        if scores[abs(literal)] >= scores[-abs(literal)]:
+            clauses.append([abs(literal)])
+        else:
+            clauses.append([-abs(literal)])
 
         # sort clauses again
         clauses = sorted(clauses, key = lambda l: len(l))
@@ -71,7 +93,7 @@ def SAT_Solver():
         if len(digits)==size**2:
             return digits
         
-        break
+        
         
 if __name__ == '__main__':
     print(SAT_Solver())
