@@ -4,8 +4,6 @@ from collections import Counter
 
 def SAT_Solver():
     clauses = []
-    digits = []
-    deleted_clauses = []
 
     # read rules file
     with open(sys.argv[1],'r') as f:
@@ -30,70 +28,75 @@ def SAT_Solver():
             digit = int(cell)
             literal = row*100 + column*10 + digit
             clauses.append([int(literal)])
-            digits.append(int(literal))
-    
-    clauses = sorted(clauses, key = lambda l: len(l))
-    # start DPLL
+
 
     # Tautology rule
     for i, clause in enumerate(clauses):
         for literal in clause:
             for j in range(len(clause)):
                 if clause[j] == -literal:
-                    clauses.pop(i)
-    while True:
-        # no clauses
-        if len(clauses) == 0:
-            return 'sat', digits
+                    clauses.pop(i)    
+    
+    if DPLL(clauses, digit) == True: return 'sat'
+    else: return 'unsat'
+    
+def DPLL(clauses, P, trues=[]):
+    # add P to true literals
+    if P not in trues: trues.append(P)
 
-        # empty clause
-        for clause in clauses:
-            if len(clause)==0:
-                return 'unsat' 
+    # sort clauses on length
+    clauses = sorted(clauses, key = lambda l: len(l))
+    print(clauses)
+    print()
+    
+    # remove clauses containing literal P and shorten clauses containing -P
+    true_idx = []
+    for i, clause in enumerate(clauses):
+        if P in clause:
+            true_idx.append(i)
+        if -P in clause:
+            clauses[i].pop(clause.index(-P))
+    for index in sorted(true_idx, reverse=True):
+        clauses.pop(index)   
 
-        # unit clause
-        while True:
-            if len(clauses[0]) == 1:
-                literal = clauses[0][0]
-                if literal not in digits:
-                    digits.append(literal)
-                true_idx = []
-                for i, clause in enumerate(clauses):
-                    if literal in clause:
-                        true_idx.append(i)
-                for index in sorted(true_idx, reverse=True):
-                    deleted_clauses.append(clauses.pop(index))
-            else:
-                break
+    # no clauses
+    if len(clauses) == 0:
+        return True
 
-        # split (DLCS)
-        # TODO implement split GSAT
-      
-        # concatenate all literals
-        all_clauses=[]
-        for clause in clauses:
-            all_clauses+=clause
+    # empty clause
+    for clause in clauses:
+        if len(clause)==0: 
+            del trues[-1]
+            return False 
 
-        # sort by DLCS
-        scores = Counter(all_clauses)
-        CP_CN = sorted(sorted(scores), key=lambda symbol: scores[symbol] + scores[-symbol])
+    # choose P in clauses
+    
+    # either:
 
-        # set next truth value to literal 
-        v = 0 # TODO adjust
-        literal = CP_CN[v]
-        if scores[abs(literal)] >= scores[-abs(literal)]:
-            clauses.append([abs(literal)])
-        else:
-            clauses.append([-abs(literal)])
-
-        # sort clauses again
-        clauses = sorted(clauses, key = lambda l: len(l))
-
-        # finished?
-        if len(digits)==size**2:
-            return digits
+    # unit clause
+    if len(clauses[0]) == 1:
+        DPLL(clauses, clauses[0][0], trues)
         
-        
-        
+    # or:
+
+    # split (DLCS) TODO implement GSAT
+    
+    # concatenate all literals
+    all_literals=[]
+    for clause in clauses:
+        all_literals+=clause
+
+    # sort by DLCS
+    scores = Counter(all_literals)
+    CP_CN = max(sorted(scores), key=lambda symbol: scores[symbol] + scores[-symbol])
+
+    if DPLL(clauses, CP_CN, trues) == True: 
+        print([x for x in trues if x>0])
+        return True 
+    else: DPLL(clauses, -CP_CN, trues)
+    
+       
 if __name__ == '__main__':
-    print(SAT_Solver())
+    print(SAT_Solver()) 
+    # TODO access true literals
+    # TODO unsat? 
