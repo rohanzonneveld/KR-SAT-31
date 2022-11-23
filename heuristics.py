@@ -93,5 +93,5 @@ def cell_strategy():
 if __name__ == '__main__':
     solution = [111, 126, 158,
                 237, 289, 292, 248]
-    picked_literals = number_strategy(solution)
+    picked_literals =  cell_strategy(solution)
     print(picked_literals)

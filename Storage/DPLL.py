@@ -4,10 +4,13 @@ from collections import Counter
 import copy
 import numpy as np
 import time
+import random
+import math
 
 def print_sudoku(solution):
     digits = [x for x in solution if x>0]
-    sudoku = np.zeros((9,9))
+    size = math.trunc(math.sqrt(len(digits)))
+    sudoku = np.zeros((size,size))
 
     for digit in digits:
         string = str(digit)
@@ -52,11 +55,11 @@ def simplify(clauses):
     
     return clauses, list(set(removed_literals))
 
-def SAT_Solver():
+def SAT_Solver(rules_file, given_digits):
     clauses = []
 
     # read rules file
-    with open(sys.argv[1],'r') as f:
+    with open(rules_file,'r') as f:
         lines = f.read().splitlines()
 
     # get information on data
@@ -69,7 +72,7 @@ def SAT_Solver():
         clauses.append([int(x) for x in var_ids if x != '0'])
     
     # convert given digits to clauses
-    cells = [*sys.argv[2]]
+    cells = [*given_digits]
     size = math.sqrt(len(cells))
     for i, cell in enumerate(cells):
         if cell.isdigit()==True:
@@ -90,7 +93,8 @@ def SAT_Solver():
     clauses, solution = simplify(clauses)
 
     if len(clauses) == 0:
-        return 'sat', [x for x in solution if x > 0]
+        print_sudoku(solution)
+        return 'sat'
 
     if DPLL(clauses, solution=solution) == True: return 'sat'
     else: return 'unsat'
@@ -128,16 +132,16 @@ def DPLL(clauses, P=None, solution=[]):
     
     # split (DLCS)
     
-    # concatenate all literals
-    all_literals=[]
-    for clause in new_clauses:
-        all_literals+=clause
+    # # concatenate all literals
+    # all_literals=[]
+    # for clause in new_clauses:
+    #     all_literals+=clause
+    
+    # # sort by DLCS
+    # scores = Counter(all_literals)
+    # CP_CN = max(sorted(scores), key=lambda symbol: scores[symbol] + scores[-symbol])
 
-    # sort by DLCS
-    scores = Counter(all_literals)
-    CP_CN = max(sorted(scores), key=lambda symbol: scores[symbol] + scores[-symbol])
-
-    # split JW
+    # split choose a literal out of shortest clause
     new_clauses = sorted(new_clauses, key = lambda c: len(c))
     picked_literal = new_clauses[0][0]
 
@@ -149,6 +153,7 @@ def DPLL(clauses, P=None, solution=[]):
        
 if __name__ == '__main__':
     start = time.time()
-    print(SAT_Solver()) 
+    print(SAT_Solver("SAT resources/sudoku-rules-9x9.txt",
+                    "52...6.........7.13...........4..8..6......5...........418.........3..2...87.....")) 
     end = time.time()
     print(f"execution of sudoku solver took {end-start} seconds")

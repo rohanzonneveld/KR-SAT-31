@@ -1,0 +1,5 @@
+The program runs with command line arguments. First the location of the rules
+and then the unsolved sudoku in the format on canvas ('..34...23..etc.'). An example of a sudoku that the algorithm is able to solve is 
+"5..6.7.4..4.5...3.2...4....1..4..9.2...2..3.5..6...4....2...1.6.3.1.2........6...".
+If the last three is removed the solver cant find a solution anymore, like so:
+"5..6.7.4..4.5...3.2...4....1..4..9.2...2..3.5..6...4....2...1.6...1.2........6...".

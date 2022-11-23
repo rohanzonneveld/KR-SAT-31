@@ -4,7 +4,6 @@ from collections import Counter
 import copy
 import numpy as np
 import time
-from heuristics import *
 import random
 
 def print_sudoku(solution):
@@ -55,8 +54,8 @@ def simplify(clauses):
     return clauses, list(set(removed_literals))
 
 
-def DPLL(clauses, P=None, solution=[], heuristic=1):
-    
+def DPLL(clauses, P=None, solution=[]):
+
     copy_clauses = copy.deepcopy(clauses)
     copy_solution = copy.deepcopy(solution)
 
@@ -82,33 +81,29 @@ def DPLL(clauses, P=None, solution=[], heuristic=1):
         if len(clause)==0: 
             return False
     
-    # split
-    if heuristic == 1: # number strategy 
-        possibles = number_strategy(new_solution)
-        
-        for option in possibles:    # test all options
-            if DPLL(new_clauses, option, new_solution) == True:
-                return True     # if satisfactory return True
-            else:
-                continue    # if not satisfactory: test next option
-        else: return False    # if all options are unsatisfactory: branch up
-   
-    elif heuristic == 2: # TODO cell strategy
-        picked_literal = cell_strategy()
+    # concatenate all literals
+    all_literals=[]
+    for clause in new_clauses:
+        all_literals+=clause
+    all_literals = list(set(all_literals)) # get all unique literals
 
-    elif heuristic[0] == 3: # TODO switch with probability p
-        current = heuristic[1]
-        threshold = heuristic[2]
-        p = random.uniform(0,1)
-        if p < threshold:
-            if current == 1:
-                current = 2
-            elif current == 2:
-                current = 1
-                  
-    else:
-        print("Invalid heuristic input")
-
+    # split JW_OS
+    # JW = dict()
+    # for literal in all_literals:
+    #     for clause in new_clauses:
+    #         if literal in clause:
+    #             if literal in JW:
+    #                 JW[literal] += 2**-len(clause)
+    #             else:
+    #                 JW[literal] = 2**-len(clause)
+    
+    picked_literal = random.choice(all_literals)
+    
+    if DPLL(new_clauses, P = picked_literal, solution = new_solution) == True: # proceed down the tree
+        return True
+    elif DPLL(clauses, P = -picked_literal, solution = solution) == True: # flip literal and proceed along other side of tree
+        return True
+    else: return False # branch up
 
 def SAT_Solver():
     clauses = []
@@ -134,9 +129,6 @@ def SAT_Solver():
             literal = row*100 + column*10 + digit
             clauses.append([int(literal)])
 
-    # version algorithm
-    version = sys.argv[3]
-    heuristic = int(version[1])
 
     # Tautology rule
     for i, clause in enumerate(clauses):
@@ -151,11 +143,10 @@ def SAT_Solver():
         print_sudoku(solution)
         return 'sat'
 
-    if DPLL(clauses, solution=solution, heuristic=heuristic) == True: return 'sat'
+    if DPLL(clauses, solution=solution) == True: return 'sat'
     else: return 'unsat'
     
 
-picked_literals = []
 if __name__ == '__main__':
     start = time.time()
     print(SAT_Solver()) 
