@@ -1,6 +1,5 @@
 import sys
 import math
-from collections import Counter
 import copy
 import numpy as np
 import time
@@ -8,6 +7,9 @@ from heuristics import *
 import random
 import shutil
 import pandas as pd
+
+calls=0
+backtracks = 0
 
 def print_sudoku(solution):
     digits = [x for x in solution if x>0]
@@ -57,7 +59,10 @@ def simplify(clauses):
     return clauses, list(set(removed_literals))
 
 
-def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_backtracks=0, n_sudoku=0, save_results=False, calls=0):
+def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_sudoku=0, save_results=False):
+    global calls
+    global backtracks
+    
     # update total calls to the function
     calls+=1
 
@@ -74,20 +79,24 @@ def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_backtracks=0, n_sud
     # check for contradiction
     for literal in new_solution:
         if -literal in new_solution: 
+            backtracks+=1
             return False
 
     # no clauses
     if len(new_clauses) == 0:
-        print_sudoku(new_solution)
+        # print_sudoku(new_solution)
         # write to results to file
         if save_results == True:
-            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [calls], 'algorithm': [version]})
+            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [calls], 'backtracks': [backtracks], 'algorithm': ["-S2/3"]})
             df.to_csv('data.csv', mode='a', index=False, header=False)
+        calls = 0
+        backtracks=0
         return True
 
     # empty clause
     for clause in new_clauses:
-        if len(clause)==0: 
+        if len(clause)==0:
+            backtracks+=1 
             return False
     
     # split
@@ -99,9 +108,9 @@ def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_backtracks=0, n_sud
     
         picked_literal = random.choice(all_literals)
 
-        if DPLL(new_clauses, P = picked_literal, solution = new_solution, version=version, p=p, n_backtracks=n_backtracks, n_sudoku=n_sudoku, save_results=save_results, calls=calls) == True: # proceed down the tree
+        if DPLL(new_clauses, P = picked_literal, solution = new_solution, version=version, p=p, n_sudoku=n_sudoku, save_results=save_results) == True: # proceed down the tree
             return True
-        elif DPLL(clauses, P = -picked_literal, solution = solution, version=version, p=p, n_backtracks=n_backtracks, n_sudoku=n_sudoku, save_results=save_results, calls=calls) == True: # flip literal and proceed along other side of tree
+        elif DPLL(new_clauses, P = -picked_literal, solution = new_solution, version=version, p=p, n_sudoku=n_sudoku, save_results=save_results) == True: # flip literal and proceed along other side of tree
             return True
         else: return False # branch up
 
@@ -113,10 +122,9 @@ def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_backtracks=0, n_sud
         possibles = number_strategy(new_solution)
 
         for option in possibles:    # test all options
-            if DPLL(new_clauses, option, new_solution, version=version, p=p, n_backtracks=n_backtracks, n_sudoku=n_sudoku, save_results=save_results, calls=calls) == True:
+            if DPLL(new_clauses, option, new_solution, version=version, p=p, n_sudoku=n_sudoku, save_results=save_results) == True:
                 return True     # if satisfactory return True
             else:
-                n_backtracks += 1
                 continue    # if not satisfactory: test next option
         else: return False    # if all options are unsatisfactory: branch up
    
@@ -124,10 +132,9 @@ def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_backtracks=0, n_sud
         possibles = cell_strategy(new_solution)
 
         for option in possibles:
-            if DPLL(new_clauses, option, new_solution, version=version, p=p, n_backtracks=n_backtracks, n_sudoku=n_sudoku, save_results=save_results, calls=calls) == True:
+            if DPLL(new_clauses, option, new_solution, version=version, p=p, n_sudoku=n_sudoku, save_results=save_results) == True:
                 return True     # if satisfactory return True
             else:
-                n_backtracks += 1
                 continue    # if not satisfactory: test next option
         else: return False    # if all options are unsatisfactory: branch up             
 
@@ -158,10 +165,10 @@ def SAT_Solver(version, sudoku, p=0, n_sudoku=0, save_results=False):
     clauses, solution = simplify(clauses)
 
     if len(clauses) == 0:
-        print_sudoku(solution)
+        # print_sudoku(solution)
         # write to results file
         if save_results == True:
-            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [0], 'algorithm': [version]})
+            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [0], 'backtracks': [0], 'algorithm': ["-S2/3"]})
             df.to_csv('data.csv', mode='a', index=False, header=False)
         return 'sat'
 

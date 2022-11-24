@@ -7,7 +7,7 @@ with open('SAT resources/top2365.sdk.txt','r') as f:
     sudokus = f.readlines()
 
 # create empty csv file to store data
-# df = pd.DataFrame({'n_sudoku': [None], 'backtracks': [None], 'algorithm': [None]})
+# df = pd.DataFrame({'n_sudoku': [None], 'calls': [None], 'backtracks': [None], 'algorithm': [None]})
 # df.to_csv('data.csv', index=False)
 
 start = time.time()
@@ -32,8 +32,7 @@ for n_sudoku, sudoku in enumerate(sudokus):
         for given in givens:
             f.write(str(int(given)) + ' 0\n')   
 
-    stats = {'calls': 0}
-    print(SAT_Solver("-S1", 'sudoku.txt', p=0, n_sudoku=n_sudoku, save_results=True))
+    SAT_Solver("-S2", 'sudoku.txt', p=0.2, n_sudoku=n_sudoku, save_results=True)
 
 end = time.time()
 print(f"Execution of all {len(sudokus)} sudokus took {end-start} seconds")
