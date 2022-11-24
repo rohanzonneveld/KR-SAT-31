@@ -44,12 +44,12 @@ def number_strategy(solution):
     if len(order) != 9: # not all digits present in current sudoku, so add them to posibilities
         for number in range(1,10):
             for elem in order:
-                if str(number) != elem[0]:
+                if number != elem[0]:
                     pass
                 else:
                     break
             else:
-                order.append((str(number),0))
+                order.append((number,0))
 
     # create list of placed digits in unit
     placed = [elem%10 for elem in unit]
@@ -87,11 +87,37 @@ def number_strategy(solution):
     return output
 
 
-def cell_strategy():
-    pass
+def cell_strategy(solution):
+    # find all empty cells
+    all_cells=[]
+    for r in range(1,10):
+        for c in range(1,10):
+            all_cells.append(10*r + c)
+
+    filled = [math.trunc(elem/10) for elem in solution if elem>0]
+
+    # find first empty cell
+    for cell in all_cells:
+        if cell not in filled:
+            empty = cell
+            break
+
+    # find possibilities for first empty cell
+    restricts = []
+    for i, x in enumerate(solution):
+        if math.ceil(x/10) == -empty:
+            restricts.append(-solution[i]%10)
+    
+    possibles = []
+    for i in range(1,10):
+        if i not in restricts:
+            possibles.append(empty*10+i)
+
+    return possibles            
+
 
 if __name__ == '__main__':
     solution = [111, 126, 158,
-                237, 289, 292, 248]
-    picked_literals =  cell_strategy(solution)
-    print(picked_literals)
+                237, 289, 292, 248,
+                -131, -136, -138]
+    print(cell_strategy(solution))
