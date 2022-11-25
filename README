@@ -11,3 +11,5 @@ chosen (-S1).
 
 To recreate the data obtained for the paper run loop.py with all different algorithms.
 
+All data used for the paper can be found in data.csv
+
