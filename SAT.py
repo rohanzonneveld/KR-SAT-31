@@ -153,7 +153,7 @@ def SAT_Solver(version, sudoku, p=0, n_sudoku=0, save_results=False):
     # convert to clauses
     for line in lines:
         var_ids = line.split(' ')
-        clauses.append([int(x) for x in var_ids if x != '0'])
+        clauses.append([int(x) for x in var_ids if x != '0' and x != ''])
     
     # Tautology rule
     for i, clause in enumerate(clauses):
