@@ -1,14 +1,16 @@
 from SAT import *
 import time
 import pandas as pd
+from os import path
 
 # read database of sudokus into file
 with open('SAT resources/top2365.sdk.txt','r') as f:
     sudokus = f.readlines()
 
 # create empty csv file to store data
-# df = pd.DataFrame({'n_sudoku': [None], 'calls': [None], 'backtracks': [None], 'algorithm': [None]})
-# df.to_csv('data.csv', index=False)
+if not path.exists('data.csv'):
+    df = pd.DataFrame({'n_sudoku': [None], 'calls': [None], 'backtracks': [None], 'algorithm': [None]})
+    df.to_csv('data.csv', index=False)
 
 start = time.time()
 

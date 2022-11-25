@@ -84,10 +84,10 @@ def DPLL(clauses, P=None, solution=[], version='-S2', p=0, n_sudoku=0, save_resu
 
     # no clauses
     if len(new_clauses) == 0:
-        # print_sudoku(new_solution)
+        print_sudoku(new_solution)
         # write to results to file
         if save_results == True:
-            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [calls], 'backtracks': [backtracks], 'algorithm': ["-S2/3"]})
+            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [calls], 'backtracks': [backtracks], 'algorithm': [version]})
             df.to_csv('data.csv', mode='a', index=False, header=False)
         calls = 0
         backtracks=0
@@ -165,10 +165,10 @@ def SAT_Solver(version, sudoku, p=0, n_sudoku=0, save_results=False):
     clauses, solution = simplify(clauses)
 
     if len(clauses) == 0:
-        # print_sudoku(solution)
+        print_sudoku(solution)
         # write to results file
         if save_results == True:
-            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [0], 'backtracks': [0], 'algorithm': ["-S2/3"]})
+            df = pd.DataFrame({'n_sudoku': [n_sudoku], 'calls': [0], 'backtracks': [0], 'algorithm': [version]})
             df.to_csv('data.csv', mode='a', index=False, header=False)
         return 'sat'
 
@@ -204,10 +204,10 @@ if __name__ == '__main__':
             for given in givens:
                 f.write(str(int(given)) + ' 0\n')
 
-        version = "-S1"
+        version = "-S3"
         sudoku = 'sudoku.txt'
 
 
-    print(SAT_Solver(version, sudoku, p=0, save_results=False)) 
+    print(SAT_Solver(version, sudoku, p=0.2, save_results=False)) 
     end = time.time()
     print(f"execution of sudoku solver took {end-start} seconds")

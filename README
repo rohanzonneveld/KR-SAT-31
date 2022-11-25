@@ -1,5 +1,13 @@
-The program runs with command line arguments. First the location of the rules
-and then the unsolved sudoku in the format on canvas ('..34...23..etc.'). An example of a sudoku that the algorithm is able to solve is 
-"5..6.7.4..4.5...3.2...4....1..4..9.2...2..3.5..6...4....2...1.6.3.1.2........6...".
-If the last three is removed the solver cant find a solution anymore, like so:
-"5..6.7.4..4.5...3.2...4....1..4..9.2...2..3.5..6...4....2...1.6...1.2........6...".
+The SAT.py contains three version of the DPLL algorithm.
+-S1: basic DPLL with random choice of next literal
+-S2: adapted DPLL with human strategy based number strategy heuristic
+-S3: adapted DPLL with human strategy based cell strategy heuristic
+
+To test the algorithm which switches between -S2 and -S3 set p=0.2 in line 211 of
+SAT.py and run program with command line arguments as usual. Algorithm will start
+with chosen heuristic and will switch to the other human based strategy with 
+probability p. Note that the algorithm will not switch if the basic DPLL is
+chosen (-S1).
+
+To recreate the data obtained for the paper run loop.py with all different algorithms.
+
